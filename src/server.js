@@ -11,7 +11,7 @@ const setupServer = () => {
     res.send(pokeData.pokemon);
   });
 
-  app.get("/api/pokemon/:n", (req, res) => {
+  app.get("/api/pokemon/limit/:n", (req, res) => {
     console.log("req.params.n", req.params.n);
     if (req.params.n !== undefined) {
       const limit = req.params.n;
@@ -29,9 +29,22 @@ const setupServer = () => {
     res.sendStatus(201);
   });
 
-  /* - `GET /api/pokemon`
-  - It should return the full list of Pokemon
-  - It is able to take a query parameter `limit=n` that makes the endpoint only return the first `n` Pokemon */
+  /*  - `GET /api/pokemon/:id`
+  - It should return the Pokemon with the given id. Example: `GET /api/pokemon/042` should return the data for Golbat
+  - Leading zeroes should not be necessary, so `GET /api/pokemon/42` would also return Golbat
+- `GET /api/pokemon/:name`
+  - It should return the Pokemon with given name. Example: `GET /api/pokemon/Mew` should return the data for Mew
+  - The name should be case-insensitive
+  - Hint: You might want to try handling this one and the last one in the same route. */
+
+  app.get("/api/pokemon/:id", (req, res) => {
+    const id = req.params.id;
+    console.log("id", id);
+    const pokemon = pokeData.pokemon[id - 1];
+    console.log("pokemon", pokemon);
+
+    res.send(pokemon);
+  });
 
   return app;
 };
