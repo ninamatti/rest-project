@@ -7,6 +7,19 @@ const setupServer = () => {
   const app = express();
   // GET /api/pokemon
 
+  // helper function
+  const pokeFinder = (input) => {
+    if (Number(input)) {
+      for (let i = 0; i < pokeData.pokemon.length; i++) {
+        if (Number(pokeData.pokemon[i].id === input)) return i;
+      }
+    } else {
+      for (let i = 0; i < pokeData.pokemon.length; i++) {
+        if (pokeData.pokemon[i].name === input) return i;
+      }
+    }
+  };
+
   app.get("/api/pokemon/", (req, res) => {
     res.send(pokeData.pokemon);
   });
@@ -37,14 +50,67 @@ const setupServer = () => {
   - The name should be case-insensitive
   - Hint: You might want to try handling this one and the last one in the same route. */
 
-  app.get("/api/pokemon/:id", (req, res) => {
-    const id = req.params.id;
-    console.log("id", id);
-    const pokemon = pokeData.pokemon[id - 1];
-    console.log("pokemon", pokemon);
-
-    res.send(pokemon);
+  app.get("/api/pokemon/:identifier", (req, res) => {
+    console.log("req.params.identifier", Number(req.params.identifier));
+    console.log("typeof req.params.identifier", typeof req.params.identifier);
+    if (Number(req.params.identifier)) {
+      const id = req.params.identifier;
+      for (let i = 0; i < pokeData.pokemon.length; i++) {
+        if (Number(pokeData.pokemon[i].id) === id)
+          res.send(pokeData.pokemon[i]);
+      }
+    } else {
+      const name = req.params.identifier;
+      for (let i = 0; i < pokeData.pokemon.length; i++) {
+        if (pokeData.pokemon[i].name === name) res.send(pokeData.pokemon[i]);
+      }
+    }
   });
+
+  app.patch("/api/pokemon/:idOrName", (req, res) => {});
+
+  app.delete("/api/pokemon/:idOrName", (req, res) => {});
+
+  app.get("/api/pokemon/:idOrName/evolutions", (req, res) => {});
+
+  app.get("/api/pokemon/:idOrName/evolutions/previous", (req, res) => {});
+
+  app.get("/api/types", (req, res) => {});
+
+  app.post("/api/types", (req, res) => {
+    // Adds a Type
+  });
+
+  app.delete("/api/types/:name", (req, res) => {
+    // Deletes the given type
+  });
+
+  app.get("/api/types/:type/pokemon", (req, res) => {
+    // It should return all Pokemon that are of a given type
+  });
+
+  // GET /api/types/:type/pokemon
+
+  // You only need to return id and name of the Pokemon, not the whole data for the Pokemon
+  // GET /api/attacks
+  // It should return all attacks
+  // It is able to take a query parameter limit=n that makes the endpoint only return n attacks
+  // GET /api/attacks/fast
+  // It should return fast attacks
+  // It is able to take a query parameter limit=n that makes the endpoint only return n attacks
+  // GET /api/attacks/special
+  // It should return special attacks
+  // It is able to take a query parameter limit=n that makes the endpoint only return n attacks
+  // GET /api/attacks/:name
+  // Get a specific attack by name, no matter if it is fast or special
+  // GET /api/attacks/:name/pokemon
+  // Returns all Pokemon (id and name) that have an attack with the given name
+  // POST /api/attacks/fast or POST /api/attacks/special
+  // Add an attack
+  // PATCH /api/attacks/:name
+  // Modifies specified attack
+  // DELETE /api/attacks/:name
+  // Deletes an attack
 
   return app;
 };

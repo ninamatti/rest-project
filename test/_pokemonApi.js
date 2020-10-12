@@ -21,7 +21,7 @@ describe("Pokemon API Server", () => {
   describe("basic requirements", () => {
     describe("GET /api/pokemon", () => {
       it("should be able to get the whole list of pokemons", async () => {
-        const res = await request.get("/api/pokemon/");
+        const res = await request.get("/api/pokemon");
         chai.expect(res.body.length).to.equal(151);
       });
       it("should only return the first n pokemon with limit query", async () => {
@@ -38,11 +38,17 @@ describe("Pokemon API Server", () => {
     });
 
     describe("GET /api/pokemon/:id", () => {
-      it("should find the pokemon", async () => {
+      it("should find the pokemon by id", async () => {
         const res = await request.get("/api/pokemon/42");
         const expected = "Golbat";
-        console.log(res.body);
         chai.expect(res.body.name).to.equal(expected);
+      });
+    });
+
+    describe("GET /api/pokemon/:name", () => {
+      it("should find the pokemon by name", async () => {
+        const res = await request.get("/api/pokemon/Golbat");
+        chai.expect(res.body.id).to.equal("042");
       });
     });
   });
