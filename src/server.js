@@ -7,19 +7,6 @@ const setupServer = () => {
   const app = express();
   // GET /api/pokemon
 
-  // helper function
-  const pokeFinder = (input) => {
-    if (Number(input)) {
-      for (let i = 0; i < pokeData.pokemon.length; i++) {
-        if (Number(pokeData.pokemon[i].id === input)) return i;
-      }
-    } else {
-      for (let i = 0; i < pokeData.pokemon.length; i++) {
-        if (pokeData.pokemon[i].name === input) return i;
-      }
-    }
-  };
-
   app.get("/api/pokemon/", (req, res) => {
     res.send(pokeData.pokemon);
   });
@@ -51,29 +38,85 @@ const setupServer = () => {
   - Hint: You might want to try handling this one and the last one in the same route. */
 
   app.get("/api/pokemon/:identifier", (req, res) => {
-    console.log("req.params.identifier", Number(req.params.identifier));
-    console.log("typeof req.params.identifier", typeof req.params.identifier);
     if (Number(req.params.identifier)) {
-      const id = req.params.identifier;
-      for (let i = 0; i < pokeData.pokemon.length; i++) {
-        if (Number(pokeData.pokemon[i].id) === id)
-          res.send(pokeData.pokemon[i]);
+      const id = Number(req.params.identifier);
+      for (const item of pokeData.pokemon) {
+        if (Number(item.id) === id) res.send(item);
       }
     } else {
       const name = req.params.identifier;
-      for (let i = 0; i < pokeData.pokemon.length; i++) {
-        if (pokeData.pokemon[i].name === name) res.send(pokeData.pokemon[i]);
+      for (const item of pokeData.pokemon) {
+        if (item.name === name) res.send(item);
       }
     }
   });
 
-  app.patch("/api/pokemon/:idOrName", (req, res) => {});
+  app.patch("/api/pokemon/:idOrName", (req, res) => {
+    let Index = 0;
+    const { name } = req.query;
+    if (Number(req.params.identifier)) {
+      const id = Number(req.params.idOrName);
+      for (const [index, value] of pokeData.pokemon.entries()) {
+        if (Number(value.id) === id) Index = index;
+      }
+    } else {
+      const name = req.params.idOrName;
+      for (const [index, value] of pokeData.pokemon.entries()) {
+        if (value.name === name) Index = index;
+      }
+    }
+    pokeData.pokemon[Index].name = name;
+    res.send(pokeData.pokemon[Index]);
+  });
 
-  app.delete("/api/pokemon/:idOrName", (req, res) => {});
+  app.delete("/api/pokemon/:idOrName", (req, res) => {
+    let Index = 0;
+    if (Number(req.params.identifier)) {
+      const id = Number(req.params.idOrName);
+      for (const [index, value] of pokeData.pokemon.entries()) {
+        if (Number(value.id) === id) Index = index;
+      }
+    } else {
+      const name = req.params.idOrName;
+      for (const [index, value] of pokeData.pokemon.entries()) {
+        if (value.name === name) Index = index;
+      }
+    }
+    pokeData.pokemon.splice(Index, 1);
+    res.send(pokeData.pokemon);
+  });
 
-  app.get("/api/pokemon/:idOrName/evolutions", (req, res) => {});
+  app.get("/api/pokemon/:idOrName/evolutions", (req, res) => {
+    let Index = 0;
+    if (Number(req.params.identifier)) {
+      const id = Number(req.params.idOrName);
+      for (const [index, value] of pokeData.pokemon.entries()) {
+        if (Number(value.id) === id) Index = index;
+      }
+    } else {
+      const name = req.params.idOrName;
+      for (const [index, value] of pokeData.pokemon.entries()) {
+        if (value.name === name) Index = index;
+      }
+    }
+    res.send(pokeData.pokemon[Index].evolutions);
+  });
 
-  app.get("/api/pokemon/:idOrName/evolutions/previous", (req, res) => {});
+  app.get("/api/pokemon/:idOrName/evolutions/previous", (req, res) => {
+    let Index = 0;
+    if (Number(req.params.identifier)) {
+      const id = Number(req.params.idOrName);
+      for (const [index, value] of pokeData.pokemon.entries()) {
+        if (Number(value.id) === id) Index = index;
+      }
+    } else {
+      const name = req.params.idOrName;
+      for (const [index, value] of pokeData.pokemon.entries()) {
+        if (value.name === name) Index = index;
+      }
+    }
+    res.send(pokeData.pokemon[Index]["Previous evolution(s)"]);
+  });
 
   app.get("/api/types", (req, res) => {});
 

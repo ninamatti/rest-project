@@ -51,5 +51,46 @@ describe("Pokemon API Server", () => {
         chai.expect(res.body.id).to.equal("042");
       });
     });
+
+    describe("PATCH /api/pokemon/:nameorid", () => {
+      it("should alter the pokemon name", async () => {
+        const res = await request
+          .patch("/api/pokemon/Golbat")
+          .query({ name: "Digimon" });
+        res.status.should.equal(200);
+        res.body.name.should.equal("Digimon");
+      });
+    });
+    describe("Delete /api/pokemon/:nameorid", () => {
+      it("should delete the given pokemon", async () => {
+        const res = await request.delete("/api/pokemon/Abra");
+        let dummy = true;
+        for (const pokemon of res.body) {
+          if (pokemon.name === "Golbat") dummy = false;
+        }
+        dummy.should.equal(true);
+      });
+    });
+
+    describe("GET /api/pokemon/:idOrName/evolutions", () => {
+      it("should show the evolutions of a pokemon", async () => {
+        const res = await request.get("/api/pokemon/Squirtle/evolutions");
+        const expected = [
+          { id: 8, name: "Wartortle" },
+          { id: 9, name: "Blastoise" },
+        ];
+        res.body.should.deep.equal(expected);
+      });
+    });
+
+    describe("GET /api/pokemon/:idOrName/evolutions/previous", () => {
+      it("should show the previous evolutions of a pokemon", async () => {
+        const res = await request.get(
+          "/api/pokemon/Wartortle/evolutions/previous"
+        );
+        const expected = [{ id: 7, name: "Squirtle" }];
+        res.body.should.deep.equal(expected);
+      });
+    });
   });
 });
