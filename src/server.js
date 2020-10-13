@@ -12,7 +12,6 @@ const setupServer = () => {
   });
 
   app.get("/api/pokemon/limit/:n", (req, res) => {
-    console.log("req.params.n", req.params.n);
     if (req.params.n !== undefined) {
       const limit = req.params.n;
       const result = pokeData.pokemon.slice(0, limit);
@@ -118,42 +117,127 @@ const setupServer = () => {
     res.send(pokeData.pokemon[Index]["Previous evolution(s)"]);
   });
 
-  app.get("/api/types", (req, res) => {});
+  app.get("/api/types", (req, res) => {
+    const { limit } = req.query;
+    if (limit) res.send(pokeData.types.slice(0, limit));
+    else res.send(pokeData.types);
+  });
 
   app.post("/api/types", (req, res) => {
     // Adds a Type
+    const { typeName } = req.query;
+    pokeData.types.push(typeName);
+    res.send(pokeData.types);
   });
 
   app.delete("/api/types/:name", (req, res) => {
     // Deletes the given type
+    const typeName = req.params.name;
+    for (let i = 0; i < pokeData.types.length; i++) {
+      if (pokeData.types[i] === typeName) pokeData.types.splice(i, 1);
+    }
+    res.send(pokeData.types);
   });
 
   app.get("/api/types/:type/pokemon", (req, res) => {
     // It should return all Pokemon that are of a given type
+    const result = [];
+    const type = req.params.type;
+    for (const pokemon of pokeData.pokemon) {
+      if (pokemon.types.indexOf(type) > -1)
+        result.push({ id: pokemon.id, name: pokemon.name });
+    }
+    res.send(result);
   });
 
-  // GET /api/types/:type/pokemon
+  app.get("/api/attacks", (req, res) => {
+    const { limit } = req.query;
+    const result = [];
+    const fastLength = pokeData.attacks.fast.length;
+    if (!limit) res.send(pokeData.attacks);
+    if (limit <= fastLength) {
+      for (let i = 0; i < limit; i++) {
+        result[i] = pokeData.attacks.fast[i];
+      }
+      res.send(result);
+    } else {
+      for (let i = 0; i < fastLength; i++) {
+        result[i] = pokeData.attacks.fast[i];
+      }
+      for (
+        let i = 0;
+        i < limit - fastLength && i < pokeData.attacks.special.length;
+        i++
+      ) {
+        result[fastLength + i] = pokeData.attacks.special[i];
+      }
+      res.send(result);
+    }
+    // It should return all attacks
+    // It is able to take a query parameter limit=n that makes the endpoint only return n attacks
+  });
 
-  // You only need to return id and name of the Pokemon, not the whole data for the Pokemon
-  // GET /api/attacks
-  // It should return all attacks
-  // It is able to take a query parameter limit=n that makes the endpoint only return n attacks
-  // GET /api/attacks/fast
-  // It should return fast attacks
-  // It is able to take a query parameter limit=n that makes the endpoint only return n attacks
-  // GET /api/attacks/special
-  // It should return special attacks
-  // It is able to take a query parameter limit=n that makes the endpoint only return n attacks
-  // GET /api/attacks/:name
-  // Get a specific attack by name, no matter if it is fast or special
-  // GET /api/attacks/:name/pokemon
-  // Returns all Pokemon (id and name) that have an attack with the given name
-  // POST /api/attacks/fast or POST /api/attacks/special
-  // Add an attack
-  // PATCH /api/attacks/:name
-  // Modifies specified attack
-  // DELETE /api/attacks/:name
-  // Deletes an attack
+  app.get("/api/attacks/fast", (req, res) => {
+    // It should return fast attacks
+    // It is able to take a query parameter limit=n that makes the endpoint only return n attacks
+    const { limit } = req.query;
+    const result = [];
+    const fastLength = pokeData.attacks.fast.length;
+    if (!limit || limit > fastLength) res.send(pokeData.attacks.fast);
+    if (limit <= fastLength) {
+      for (let i = 0; i < limit; i++) {
+        result[i] = pokeData.attacks.fast[i];
+      }
+      res.send(result);
+    }
+  });
+
+  app.get("/api/attacks/special", (req, res) => {
+    // It should return special attacks
+    // It is able to take a query parameter limit=n that makes the endpoint only return n attacks
+    const { limit } = req.query;
+    const result = [];
+    const specialLength = pokeData.attacks.special.length;
+    if (!limit || limit > specialLength) res.send(pokeData.attacks.special);
+    if (limit <= specialLength) {
+      for (let i = 0; i < limit; i++) {
+        result[i] = pokeData.attacks.special[i];
+      }
+      res.send(result);
+    }
+  });
+
+  app.get("/api/attacks/:name", (req, res) => {
+    // Get a specific attack by name, no matter if it is fast or special
+    const attackName = req.params.name;
+
+    const finder = () => {
+      for (const attack of pokeData.attacks.fast) {
+        if (attack.name === attackName) return attack;
+      }
+      for (const attack of pokeData.attacks.special) {
+        if (attack.name === attackName) return attack;
+      }
+    };
+
+    res.send(finder());
+  });
+
+  app.get("/api/attacks/:name/pokemon", (req, res) => {
+    // Returns all Pokemon (id and name) that have an attack with the given name
+  });
+
+  app.post("/api/attacks/fast or POST /api/attacks/special", (req, res) => {
+    // Add an attack
+  });
+
+  app.patch("/api/attacks/:name", (req, res) => {
+    // Modifies specified attack
+  });
+
+  app.delete("/api/attacks/:name", (req, res) => {
+    // Deletes an attack
+  });
 
   return app;
 };

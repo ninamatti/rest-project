@@ -92,5 +92,12 @@ describe("Pokemon API Server", () => {
         res.body.should.deep.equal(expected);
       });
     });
+
+    describe("GET /api/types", () => {
+      it("should show all the types available", async () => {
+        const res = await request.get("/api/types");
+        res.body.should.deep.equal(pokeData.types);
+      });
+    });
   });
 });
