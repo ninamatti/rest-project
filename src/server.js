@@ -1,12 +1,7 @@
 const pokeData = require("./data");
 const express = require("express");
-const { indexOf } = require("underscore");
 const setupServer = () => {
-  /**
-   * Create, set up and return your express server, split things into separate files if it becomes too long!
-   */
   const app = express();
-  // GET /api/pokemon
 
   app.get("/api/pokemon/", (req, res) => {
     res.send(pokeData.pokemon);
@@ -20,22 +15,12 @@ const setupServer = () => {
     }
   });
 
-  // - `POST /api/pokemon`
-  // - It should add a Pokemon. For Basic Requirements, verification that the data is good is not necessary
   app.post("/api/pokemon/:id/:name", (req, res) => {
     const id = req.params.id;
     const name = req.params.name;
     pokeData.pokemon.push({ id, name }); //the array
     res.sendStatus(201);
   });
-
-  /*  - `GET /api/pokemon/:id`
-  - It should return the Pokemon with the given id. Example: `GET /api/pokemon/042` should return the data for Golbat
-  - Leading zeroes should not be necessary, so `GET /api/pokemon/42` would also return Golbat
-- `GET /api/pokemon/:name`
-  - It should return the Pokemon with given name. Example: `GET /api/pokemon/Mew` should return the data for Mew
-  - The name should be case-insensitive
-  - Hint: You might want to try handling this one and the last one in the same route. */
 
   app.get("/api/pokemon/:identifier", (req, res) => {
     if (Number(req.params.identifier)) {
@@ -145,8 +130,11 @@ const setupServer = () => {
     const result = [];
     const type = req.params.type;
     for (const pokemon of pokeData.pokemon) {
-      if (pokemon.types.indexOf(type) > -1)
-        result.push({ id: pokemon.id, name: pokemon.name });
+      if (pokemon.types !== undefined) {
+        if (pokemon.types.indexOf(type) > -1) {
+          result.push({ id: pokemon.id, name: pokemon.name });
+        }
+      }
     }
     res.send(result);
   });
@@ -174,8 +162,6 @@ const setupServer = () => {
       }
       res.send(result);
     }
-    // It should return all attacks
-    // It is able to take a query parameter limit=n that makes the endpoint only return n attacks
   });
 
   app.get("/api/attacks/fast", (req, res) => {
@@ -228,11 +214,13 @@ const setupServer = () => {
     const attackName = req.params.name;
     const result = [];
     const checker = (pokeObj) => {
-      for (const attack of pokeObj.attacks.fast) {
-        if (attack.name === attackName) return true;
-      }
-      for (const attack of pokeObj.attacks.special) {
-        if (attack.name === attackName) return true;
+      if (pokeObj.attacks !== undefined) {
+        for (const attack of pokeObj.attacks.fast) {
+          if (attack.name === attackName) return true;
+        }
+        for (const attack of pokeObj.attacks.special) {
+          if (attack.name === attackName) return true;
+        }
       }
       return false;
     };
@@ -240,12 +228,8 @@ const setupServer = () => {
       if (checker(pokemon) === true) {
         result.push({ id: pokemon.id, name: pokemon.name });
       }
-      res.send(result);
     }
-    //pokeData.pokemon <<loop this
-    //pokeData.pokemon.attacks.fast and pokeData.pokemon.attacks.special
-    // Returns all Pokemon (id and name) that have an attack with the given name
-    //pokeData.
+    res.send(result);
   });
 
   app.post("/api/attacks/fast", (req, res) => {
@@ -281,20 +265,27 @@ const setupServer = () => {
   });
 
   app.patch("/api/attacks/:name", (req, res) => {
+    // Modifies specified attack
     const attackName = req.params.name;
     const { newName } = req.query;
     const changer = () => {
       for (const attack of pokeData.attacks.fast) {
-        if (attack.name === attackName) attack.name = newName;
-        res.send(attack);
+        if (attack.name === attackName) {
+          attack.name = newName;
+          res.send(attack);
+          return;
+        }
       }
       for (const attack of pokeData.attacks.special) {
-        if (attack.name === attackName) attack.name = newName;
-        res.send(attack);
+        if (attack.name === attackName) {
+          attack.name = newName;
+          res.send(attack);
+          return;
+        }
       }
+      res.sendStatus(400);
     };
     changer();
-    // Modifies specified attack
   });
 
   app.delete("/api/attacks/:name", (req, res) => {
@@ -302,14 +293,20 @@ const setupServer = () => {
     const attackName = req.params.name;
     const deleter = () => {
       for (const [index, value] of pokeData.attacks.fast.entries()) {
-        if (value.name === attackName) pokeData.attacks.fast.splice(index, 1);
-        res.send(pokeData.attacks.fast);
+        if (value.name === attackName) {
+          pokeData.attacks.fast.splice(index, 1);
+          res.send(pokeData.attacks);
+          return;
+        }
       }
       for (const [index, value] of pokeData.attacks.special.entries()) {
-        if (value.name === attackName)
+        if (value.name === attackName) {
           pokeData.attacks.special.splice(index, 1);
-        res.send(pokeData.attacks.special);
+          res.send(pokeData.attacks);
+          return;
+        }
       }
+      res.sendStatus(400);
     };
     deleter();
   });
