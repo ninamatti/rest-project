@@ -1,5 +1,6 @@
 const pokeData = require("./data");
 const express = require("express");
+const { indexOf } = require("underscore");
 const setupServer = () => {
   /**
    * Create, set up and return your express server, split things into separate files if it becomes too long!
@@ -224,19 +225,93 @@ const setupServer = () => {
   });
 
   app.get("/api/attacks/:name/pokemon", (req, res) => {
+    const attackName = req.params.name;
+    const result = [];
+    const checker = (pokeObj) => {
+      for (const attack of pokeObj.attacks.fast) {
+        if (attack.name === attackName) return true;
+      }
+      for (const attack of pokeObj.attacks.special) {
+        if (attack.name === attackName) return true;
+      }
+      return false;
+    };
+    for (const pokemon of pokeData.pokemon) {
+      if (checker(pokemon) === true) {
+        result.push({ id: pokemon.id, name: pokemon.name });
+      }
+      res.send(result);
+    }
+    //pokeData.pokemon <<loop this
+    //pokeData.pokemon.attacks.fast and pokeData.pokemon.attacks.special
     // Returns all Pokemon (id and name) that have an attack with the given name
+    //pokeData.
   });
 
-  app.post("/api/attacks/fast or POST /api/attacks/special", (req, res) => {
-    // Add an attack
+  app.post("/api/attacks/fast", (req, res) => {
+    const { name, type, damage } = req.query;
+    const finder = () => {
+      for (const attack of pokeData.attacks.fast) {
+        if (attack.name === name) return true;
+      }
+      return false;
+    };
+    if (!finder()) {
+      pokeData.attacks.fast.push({ name, type, damage });
+      res.send(pokeData.attacks);
+    } else {
+      res.send("Attack already exists");
+    }
+  });
+
+  app.post("/api/attacks/special", (req, res) => {
+    const { name, type, damage } = req.query;
+    const finder = () => {
+      for (const attack of pokeData.attacks.special) {
+        if (attack.name === name) return true;
+      }
+      return false;
+    };
+    if (!finder()) {
+      pokeData.attacks.special.push({ name, type, damage });
+      res.send(pokeData.attacks);
+    } else {
+      res.send("Attack already exists");
+    }
   });
 
   app.patch("/api/attacks/:name", (req, res) => {
+    const attackName = req.params.name;
+    const { newName } = req.query;
+    const changer = () => {
+      for (const attack of pokeData.attacks.fast) {
+        if (attack.name === attackName) attack.name = newName;
+        res.send(attack);
+      }
+      for (const attack of pokeData.attacks.special) {
+        if (attack.name === attackName) attack.name = newName;
+        res.send(attack);
+      }
+    };
+    changer();
     // Modifies specified attack
   });
 
   app.delete("/api/attacks/:name", (req, res) => {
     // Deletes an attack
+    const attackName = req.params.name;
+    const deleter = () => {
+      for (const [index, value] of pokeData.attacks.fast.entries()) {
+        if (value.name === attackName) pokeData.attacks.fast.splice(index, 1);
+        res.send(pokeData.attacks.fast);
+      }
+      for (const [index, value] of pokeData.attacks.special.entries()) {
+        if (value.name === attackName)
+          pokeData.attacks.special.splice(index, 1);
+        res.send(pokeData.attacks.special);
+      }
+    };
+    deleter();
   });
 
   return app;
